@@ -25,7 +25,7 @@
 - 最优个体 `gen10-6`：**2.967 ms / 39.862 dB**，比 Bicubic 基线 +2.576 dB
 - 第 10 代出现真机 SLOW 否决（4.151 ms）—— 真机标尺确实在否决候选
 
-完整实验数据（各代权重、训练集、原始采集帧）在 [sr_loop releases](https://github.com/HGamey/sr_loop/releases)。
+各代模型权重在 [sr_loop releases](https://github.com/HGamey/sr_loop/releases)（`v1.0-gate4`）；训练集与原始采集帧未发布，需按下方步骤本地采集重建。
 
 ---
 
@@ -70,7 +70,7 @@ codesign --force --sign - ./phonefarm     # Apple Silicon 必须，否则静默�
 # 已经在大世界时用 --ready-only，只确认状态、不走位
 ```
 
-采集会做 HUD 排除、相位相关对齐、Bicubic PSNR 熔断。想跳过这步的话，[release](https://github.com/HGamey/sr_loop/releases) 里有现成的数据集 A。
+采集会做 HUD 排除、相位相关对齐、Bicubic PSNR 熔断。当前 release 只发布了模型权重，数据集 A 需要自己按上面的步骤采集。
 
 ### 第四步：跑演化环
 
