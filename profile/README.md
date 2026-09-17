@@ -25,7 +25,7 @@
 - 最优个体 `gen10-6`：**2.967 ms / 39.862 dB**，比 Bicubic 基线 +2.576 dB
 - 第 10 代出现真机 SLOW 否决（4.151 ms）—— 真机标尺确实在否决候选
 
-各代模型权重在 [sr_loop releases](https://github.com/HGamey/sr_loop/releases)（`v1.0-gate4`）；训练集与原始采集帧未发布，需按下方步骤本地采集重建。
+各代模型权重、训练数据集 A 与原始采集帧均已发布在 [sr_loop releases](https://github.com/HGamey/sr_loop/releases)（`v1.0-gate4`，数据集与采集帧因体积分片打包）；也可按下方步骤本地采集重建。
 
 ---
 
