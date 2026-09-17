@@ -70,7 +70,7 @@ codesign --force --sign - ./phonefarm     # Apple Silicon 必须，否则静默�
 # 已经在大世界时用 --ready-only，只确认状态、不走位
 ```
 
-采集会做 HUD 排除、相位相关对齐、Bicubic PSNR 熔断。当前 release 只发布了模型权重，数据集 A 需要自己按上面的步骤采集。
+采集会做 HUD 排除、相位相关对齐、Bicubic PSNR 熔断。[sr_loop releases](https://github.com/HGamey/sr_loop/releases) 的 `v1.0-gate4` 已经打包了数据集 A 与原始采集帧（体积较大，分片压缩），可以直接下载复用；这里的步骤是本地从头采集复现的路径。
 
 ### 第四步：跑演化环
 
