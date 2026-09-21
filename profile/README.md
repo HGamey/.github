@@ -27,14 +27,16 @@ NN（端侧超分 / 插帧）是这个闭环里的**一类候选改动**，不�
 
 ---
 
-## 两个仓库
+## 仓库
 
 | 仓库 | 是什么 | 语言 |
 |---|---|---|
 | **[phonefarm](https://github.com/BH3GEI/phonefarm)** | 闭环本体。驱动 Android(adb) 与 OpenHarmony(hdc) 真机：帧时序采集、GPU 归因、系统旋钮、统计判定、证据归档；以及延迟标尺、画面采集、并行调度、保活巡检 | Rust |
+| **knobs** 🔒 | 可改动面：黑盒系统旋钮 + 灰盒 Vulkan layer 注入，给 phonefarm/loop_v1 提供可插拔优化旋钮（apply/restore/status），不碰编排/采集/判定 | C++ |
+| **refbench** 🔒 | 白盒基准靶场：可被 phonefarm/loop_v1 驱动的确定性 Vulkan 渲染负载，每条优化路线一个开关，瓶颈类型可定向构造 | C++ |
 | **[sr_loop](https://github.com/HGamey/sr_loop)** | NN 候选的自进化环。基因组、模型生成、TFLite 导出、短训、Pareto 归档、代际推进 | Python |
 
-分工：**物理能力全在 phonefarm，算法循环全在 sr_loop**。sr_loop 不直接碰设备，它通过 `phonefarm` 这个独立 CLI 拿真机延迟和游戏画面。
+分工：**物理能力全在 phonefarm，算法循环全在 sr_loop**。sr_loop 不直接碰设备，它通过 `phonefarm` 这个独立 CLI 拿真机延迟和游戏画面。knobs 与 refbench 是 2026-09-21 新建的组织内部私有仓库（无公开镜像，仅成员可见），分别给闭环补上「能改什么」（黑盒/灰盒旋钮）与「白盒靶子」（可控 Vulkan 负载），由 `phonefarm/loop_v1/refbench` 驱动，目前刚立项、灰盒层待上机验证。
 
 > phonefarm 上游公开仓库是 [BH3GEI/phonefarm](https://github.com/BH3GEI/phonefarm)（原创作者与著作权方）。组织内另有一份私有开发仓库 `HGamey/phonefarm`，仅成员可见，用于承载私有改动。下面的命令都用公开上游。
 
