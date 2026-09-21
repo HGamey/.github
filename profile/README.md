@@ -8,6 +8,25 @@ NN（端侧超分 / 插帧）是这个闭环里的**一类候选改动**，不�
 
 ---
 
+## 📌 先读这份：移动 GPU 优化技术路线梳理
+
+**闭环里的候选改动从这份清单里挑。**
+
+> 🔒 组织成员：[`HGamey/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md`](https://github.com/HGamey/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)
+> 🌐 公开镜像：[`BH3GEI/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md`](https://github.com/BH3GEI/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)
+
+按移动 GPU 的三条结构性差异（TBDR、多一遍 binning、带宽与热受限且共享 LPDDR）分五类：**带宽与 tile memory、几何与 binning、shader、分辨率与上采样、时序功耗热**。每条标注移动端特有性、量级、**用闭环里的哪个指标验**、以及需不需要白盒——不能被这套闭环验证的路线不进候选。
+
+三条已落盘、可以直接引用的实测结论：
+
+| 结论 | 证据 |
+|---|---|
+| **「带宽不够」不能当默认假设** | DDR/LLCC 下限钉到硬件上限（+67% 带宽）后帧时间 p95 显著改善（p=0.0079），但 `gpu_active_mean` **不显著**（p=0.42）—— GPU 没被带宽饿着 |
+| **黑盒游戏的天花板是限帧器，不是算力** | 归因 5 轮一致：封顶 @30fps，GPU 只用掉 64.5%，余量 11.91ms，热事件 0。任何降低 GPU 工作量的路线（含 NN 超分）都换不出帧率 |
+| **NN 的账要算端到端** | `gpu` 2.967ms vs `invoke` 高约 7ms 且与结构无关，每帧拷贝 31MB；端到端 ≈10ms，吃掉 60fps 预算的 60%。这 7ms 是否测量工装产物尚未定论 |
+
+---
+
 ## 两个仓库
 
 | 仓库 | 是什么 | 语言 |
@@ -18,14 +37,6 @@ NN（端侧超分 / 插帧）是这个闭环里的**一类候选改动**，不�
 分工：**物理能力全在 phonefarm，算法循环全在 sr_loop**。sr_loop 不直接碰设备，它通过 `phonefarm` 这个独立 CLI 拿真机延迟和游戏画面。
 
 > phonefarm 上游公开仓库是 [BH3GEI/phonefarm](https://github.com/BH3GEI/phonefarm)（原创作者与著作权方）。组织内另有一份私有开发仓库 `HGamey/phonefarm`，仅成员可见，用于承载私有改动。下面的命令都用公开上游。
-
----
-
-## 先读这个
-
-**[移动 GPU 优化技术路线梳理](https://github.com/BH3GEI/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)** —— 闭环里的候选改动从这份清单里挑。
-
-按移动 GPU 的三条结构性差异（TBDR、多一遍 binning、带宽与热受限且共享 LPDDR）分五类：带宽与 tile memory、几何与 binning、shader、分辨率与上采样、时序功耗热。每条标注移动端特有性、量级、以及**用闭环里的哪个指标验**——不能被这套闭环验证的路线不进候选。
 
 ---
 
