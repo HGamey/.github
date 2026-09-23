@@ -109,10 +109,10 @@ game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判
 
 ## 正在做
 
-- `optimize` 总入口：把「优化这个游戏」这一句话变成一次完整的任务编排。
-- 给 agent 用的 skill 说明书。
-- 可视化前端：把一轮跑下来的证据摊开给人看。
 - loop_v1 的 Python 与 knobs 的 shell 脚本逐步 Rust 化，收到单一二进制里。
+- 系统参数与画面流程改写两层的真机评测：等 phonefarm 的 `eval --request` 接收端。
+
+`optimize` 总入口、agent skill 说明书、可视化前端这三个已经落地（详见 [game_opt_loop](https://github.com/HGamey/game_opt_loop) 🔒 的 STATUS.md）。
 
 ---
 
