@@ -92,7 +92,7 @@ cd src && cargo build --release && cp target/release/phonefarm .. && cd ..
 codesign --force --sign - ./phonefarm     # macOS 环境签名
 ./phonefarm devices                       # 检查设备连接
 
-# 2. 运行 game_opt_loop 算法闭环
+# 2. 运行 game_opt_loop 算法闭环（🔒 组织内部私有仓库，仅成员可访问）
 git clone https://github.com/HGamey/game_opt_loop && cd game_opt_loop
 cargo test                                # 运行防爆门禁与架构单测
 cargo run -- --track frame_gen --dry-run  # 离线运行演化验证
