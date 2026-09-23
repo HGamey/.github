@@ -32,7 +32,7 @@
 | **[phonefarm](https://github.com/BH3GEI/phonefarm)** | 自动化物理 Harness 底座。支持 Android (adb) 与 OpenHarmony (hdc) 设备：硬件时序与功耗遥测、系统旋钮控制、统计显著性裁决及现场快照还原 | Rust |
 | **[game_opt_loop](https://github.com/HGamey/game_opt_loop)** 🔒 | 渲染能效与画质自主优化 Harness。覆盖分辨率重构、时序插帧、着色器极简化与自适应锐化多赛道，集成静态安全防爆门禁、大模型变异与 Pareto 优胜归档 | Rust |
 | **[refbench](https://github.com/HGamey/refbench)** 🔒 | 白盒基准靶场。提供确定性 Vulkan 渲染管线负载与后处理挂接插槽，瓶颈特征可定向配置，为 Harness 提供已知基准环境 | C++ |
-| **[knobs](https://github.com/HGamey/knobs)** 🔒 | 系统与驱动调节层。提供黑盒系统旋钮（调度/频率/热限制）与灰盒 Vulkan Layer 注入能力，实现优化策略的可插拔应用与还原 | C++ |
+| **[knobs](https://github.com/BH3GEI/phonefarm/tree/main/knobs)** | 系统与驱动调节层。提供黑盒系统旋钮（调度/频率/热限制）与灰盒 Vulkan Layer 注入能力，实现优化策略的可插拔应用与还原。已并入 phonefarm 的 `knobs/` 子目录（原 `HGamey/knobs` 已归档） | C++ |
 | **[sr_loop](https://github.com/HGamey/sr_loop)** | 前序端侧轻量神经网络演化实验。探索模型生成、轻量短训与真机标尺代际筛选流程 | Python |
 
 **系统协作分工**：
