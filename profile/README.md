@@ -110,7 +110,7 @@ game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判
 ## 正在做
 
 - loop_v1 的判定口径已经全部收进 Rust（解析、归因、统计、判据、白名单、画面判据、模型交互与本地变异器），两通路对照、Vulkan-Samples 三道闸与两臂判读面、refbench/vks 报告也已收完；剩下编排脚本、载体构建/路线工具、设备端 shell 与 knobs/ 那批。
-- 系统参数与画面流程改写两层的真机评测：phonefarm 的 `eval --request` 接收端已落地（离线验证），真机评测还没跑通。
+- 系统参数与画面流程改写两层的真机评测：phonefarm 的 `eval --request` 接收端已落地并真机验证——③ 系统参数端到端已出报告（首候选 REJECT），② 灰档机械链路已通、命中计数与 knobs-layer 的 marker 口径待对齐。
 
 `optimize` 总入口、agent skill 说明书、可视化前端这三个已经落地（详见 [game_opt_loop](https://github.com/HGamey/game_opt_loop) 🔒 的 STATUS.md）。
 
