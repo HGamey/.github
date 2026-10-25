@@ -1,10 +1,12 @@
 # HGamey
 
-把手机游戏的性能优化做成一套能自己跑完的 harness。
+HGamey 为外部 Agent 提供远程真机研究能力，用于系统性优化指定游戏或系统，完成可复现实验并留下可审核结果。
 
-用户只需要提一种任务：**「把 \<游戏\> 在 \<手机\> 上优化一下」**。之后的事情由 harness 自己决定——先摸清这台设备和这个游戏当前是什么状况，判断该开哪几条优化路线，让大模型提出候选改动，在真机上做对照实验，用统计结果决定哪些留下、哪些回退。
+Agent 在自己的工具中选择方向、制定优先级和解释证据；平台提供设备、资源、任务、研究状态与结果。GOL 是可选的优化方法客户端，不使用内置模型也能组织研究流程。网页与 CLI/API 使用相同对象和操作合同。
 
-harness 本身就是产品。我们交付的不是某一个优化算子，而是这条从任务到结论的流水线。
+人可以异步提供技术指导、数据、现场协助和主观评价。协助请求只阻断依赖它的方向；其余可行方向继续。没有可行工作或预算用完时记录原因并可恢复地空闲。
+
+当前决定、待办与验证见[产品准则](https://github.com/HGamey/docs/blob/main/plans/2026-10-22-agent-platform/PRODUCT-CHARTER.md)、[todo](https://github.com/HGamey/docs/blob/main/plans/2026-10-22-agent-platform/todo.md)与[逐批记录](https://github.com/HGamey/docs/blob/main/plans/2026-10-22-agent-platform/BATCHES.md)。源码与隔离验收不等于某台设备、某个游戏或整套生产流程已可用。
 
 ---
 
@@ -12,13 +14,13 @@ harness 本身就是产品。我们交付的不是某一个优化算子，而是
 
 | 层 | 改什么 | 需要什么 |
 |---|---|---|
-| ① 游戏代码 | 渲染流程本身：绘制顺序、后处理、分辨率策略 | 源码（白盒） |
-| ② Vulkan 层 | 在游戏与驱动之间插一层，改写 API 调用 | **不需要源码，但需要 root** |
-| ③ 系统参数 | DVFS、总线频率、调度、热策略、刷新率 | 需要 root |
+| ① 游戏代码 | 渲染流程本身：绘制顺序、后处理、分辨率策略 | 可修改、构建和运行的源码（白盒） |
+| ② Vulkan 层 | 在游戏与驱动之间插一层，改写 API 调用 | 当前注入路线所需权限与设备/游戏支持，逐项核验 |
+| ③ 系统参数 | DVFS、总线频率、调度、热策略、刷新率 | 对应系统接口的写权限与可核验恢复路径 |
 
-白盒游戏三层都能用，黑盒商用游戏只剩 ② 和 ③。② 和 ③ 的区别只在 ② 不需要游戏源码，**要 root 这一条两者一样**。
+这些是可探索方向；闭源游戏还可能通过游戏内设置和公开接口调整。可行性取决于具体设备、系统/游戏版本、权限和实现能力，不能仅凭是否 root 推断。
 
-所以国内鸿蒙商用机上 ①②③ **一层都改不了**——没有 root，只能测。几条可能的出路：工程机、厂商官方性能接口、开发者模式下自签名应用，以及海外版华为手机（EMUI，基于安卓改的系统，麒麟芯片，能 root）——在它上面可以测 ② 和 ③ 的改动在麒麟上到底有多少效果，国内鸿蒙机只能做对照。这几条都还没有核实过，先记在这里。
+Android 已验证路径不外推到 Harmony。工程机、厂商官方接口、自签名应用或其他系统版本需独立核验；型号与品牌不证明注入、测量或恢复能力。
 
 ---
 
@@ -26,28 +28,31 @@ harness 本身就是产品。我们交付的不是某一个优化算子，而是
 
 | 仓库 | 是什么 | 语言 |
 |---|---|---|
-| **[game_opt_loop](https://github.com/HGamey/game_opt_loop)** 🔒 | 入口与决策层。接任务、摸底、决定开哪几路、组织大模型出方案、维护优胜档案、出总报告 | Rust |
-| **[phonefarm](https://github.com/BH3GEI/phonefarm)** | 底座。设备连接（adb / hdc）、应用改动、测量、统计判定、现场还原 | Rust |
-| **[refbench](https://github.com/HGamey/refbench)** 🔒 | 白盒测试载体。确定性 Vulkan 负载，每条优化路线一个开关，瓶颈类型可定向构造 | C++ |
-| **[sr_loop](https://github.com/HGamey/sr_loop)** | 前序实验，已结项。端侧超分网络的代际演化尝试，13 代记录留档 | Python |
+| **[harness-ops](https://github.com/HGamey/harness-ops)** | 节点服务、网页与 CLI/API：目录、资源、持久作业、结果、研究状态与异步协助 | Python / JavaScript |
+| **[game_opt_loop](https://github.com/HGamey/game_opt_loop)** | 可选方法客户端：候选生成、优化编排与已有方法工具 | Rust |
+| **[phonefarm](https://github.com/HGamey/phonefarm)** | 设备与测量底座、受控动作、实验方法及范围明确的恢复证据 | Rust |
+| **[refbench](https://github.com/HGamey/refbench)** | 可重复的白盒 Vulkan 负载与已知答案；机制核查不能直接外推商业游戏收益 | C++ |
+| **[docs](https://github.com/HGamey/docs)** | 产品准则、合同、待办、验证记录与历史报告 | 文档 |
 
-`HGamey/knobs` 已归档，内容并入 [`phonefarm/knobs/`](https://github.com/BH3GEI/phonefarm/tree/main/knobs)：黑档是系统参数，灰档是 Vulkan layer 注入。
+前序实验 [sr_loop](https://github.com/HGamey/sr_loop) 已结项：端侧超分网络的代际演化尝试，13 代记录留档。
 
-Megacity、Vulkan-Samples、AnKi 这几个白盒载体挂在 [`phonefarm/loop_v1/carriers/`](https://github.com/BH3GEI/phonefarm/tree/main/loop_v1/carriers) 下。
+`HGamey/knobs` 已归档，内容并入 [`phonefarm/knobs/`](https://github.com/HGamey/phonefarm/tree/main/knobs)：黑档是系统参数，灰档是 Vulkan layer 注入。
 
-演示文稿、架构图等资料放在 [`HGamey/docs`](https://github.com/HGamey/docs) 🔒。
+Megacity、Vulkan-Samples、AnKi 这几个白盒载体挂在 [`phonefarm/loop_v1/carriers/`](https://github.com/HGamey/phonefarm/tree/main/loop_v1/carriers) 下。
 
-> phonefarm 组织内另有私有协同分支；对外以 [BH3GEI/phonefarm](https://github.com/BH3GEI/phonefarm) 为准。
+演示文稿、架构图等资料放在 [`HGamey/docs`](https://github.com/HGamey/docs)。部分链接可能需要仓库访问权限。
+
+> HGamey/phonefarm 基于 [BH3GEI/phonefarm](https://github.com/BH3GEI/phonefarm) 协同演化。上游来源、当前配置的程序和已运行的会话版本分别核对，不能从仓库名称推断部署能力。
 
 ---
 
 ## 两侧的职责为什么要分开
 
-game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判定规则。**
+外部 Agent 提出候选并预先声明判据，平台按固定请求执行和保存证据；GOL 可作为其中一种方法客户端。**看到候选结果后不能改写旧实验的及格线。**
 
-判定规则在看到候选数据之前就落盘冻结：冷机门槛、回放时长、A/B 交替方式、显著性阈值。跑完之后不合格就自动回退，设备现场逐项校验回到原样。这条分界是为了防止一件很容易发生的事——调参的人顺手把及格线也一起调了。
+冷机门槛、回放时长、A/B 方式、统计规则与画质预算在实验前冻结。原游戏路径是主基线，模块 ms 也可以是明确目标。命令退出、统计判定、局部恢复和整 job 资源释放分别记录；恢复未确认时保留失败/未知与原件，不宣称已回到原样。
 
-单轮回路大致是这样：
+单轮研究流程如下；每一步的实际完成范围需有证据：
 
 ```
 选一个可重复的负载
@@ -59,8 +64,8 @@ game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判
 下发候选改动，A/B 交替对照
    ↓
 统计检验（置换检验 / 置信区间）
-   ↓  不达标就回退
-现场快照逐项校验
+   ↓  按冻结合同恢复并核验
+记录恢复范围；失败或未知保留屏障
    ↓
 结构化报告与证据归档
 ```
@@ -71,14 +76,14 @@ game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判
 
 闭环里的候选改动从这份清单里挑，按带宽与 Tile Memory、几何与 Binning、着色器计算、分辨率重构、时序功耗与散热分成五类，每条标注量级、用什么指标验、需不需要白盒。
 
-- 🔒 组织成员：[`HGamey/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md`](https://github.com/HGamey/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)
-- 🌐 公开镜像：[`BH3GEI/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md`](https://github.com/BH3GEI/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)
+- 当前文档：[`HGamey/docs · MOBILE_GPU_OPT_ROUTES.md`](https://github.com/HGamey/docs/blob/main/repos/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md)
+- 上游资料：[`BH3GEI/phonefarm/docs/MOBILE_GPU_OPT_ROUTES.md`](https://github.com/BH3GEI/phonefarm/blob/main/docs/MOBILE_GPU_OPT_ROUTES.md)
 
 ---
 
-## 已经量到的一些东西
+## 历史实验记录（仅适用于原记录条件）
 
-下面每条都有对应的仓库证据，读数字之前先看条件。
+以下保留既有报告的数字、否定结论与撤回说明。本轮只调整文档入口，没有重新实测；这些结果不证明当前部署或其他设备/版本可用。
 
 **Vulkan 层挂进原神大世界跑通。** 客户端 7.1.0，挂只读层正常登录、进大世界、跑满一轮负载，进程无异常日志、未被杀。同一轮里试的第一条改写（LoadOp `LOAD` → `DONT_CARE`）确实命中了——改写条数、绑定次数都能自报——但主指标 frame_p95 差值 −0.51%，置换检验 p = 0.325，判为无效。这是一条有价值的否定结论：机制成立，这一条换不出性能。（phonefarm PR #31）
 
@@ -97,39 +102,53 @@ game_opt_loop 出方案，phonefarm 出判定。**出方案的一方改不了判
 
 ## 设备
 
-同一个候选的 A/B 两臂必须跑在同一台手机上——跨机比较拿不到可比的数字。
+对候选效果的 A/B 归因使用同一设备与受控条件；跨设备结果需分别保留设备和条件，不能把机间差异当成候选收益。
 
-下面是**计划**，不是现有的机器清单：
+此前设备规划包括安卓测试/调试机、鸿蒙手机 1–2 台及其他系统版本的华为设备；这是待核计划，不是现有机器或权限清单。型号、系统和是否 root 不代替具体能力验证。
 
-- **安卓旗舰机**：一台跑测试，一台留着调试。要并行跑多条线，得是同型号的多台——不同型号之间的数字本来就不可比。
-- **鸿蒙手机 1–2 台**：做对照。没有 root，只能测。
-- **海外版华为手机几台**：EMUI，基于安卓改的系统，麒麟芯片，能 root。用它在麒麟上测 ② Vulkan 层和 ③ 系统参数的改动到底有多少效果——国内鸿蒙商用机改不了，只能拿来对照。
-
-设备是共享的，用 `devlock` 抢锁排队，带心跳，跑完释放。
+当前节点目录、设备登记与采样事实分开呈现；登记不代表在线或物理核验。设备操作遵循当前租约和恢复合同，心跳失效或宿主进程退出不证明设备已恢复。
 
 ---
 
-## 正在做
+## 当前状态与此前方法记录
+
+当前工作以[待办](https://github.com/HGamey/docs/blob/main/plans/2026-10-22-agent-platform/todo.md)与[逐批验证](https://github.com/HGamey/docs/blob/main/plans/2026-10-22-agent-platform/BATCHES.md)为准，代码提交、部署、隔离验收与真机验收分别记录。以下保留此前方法迁移进展，不作为当前整个平台已可用的结论：
 
 - loop_v1 的判定口径已经全部收进 Rust（解析、归因、统计、判据、白名单、画面判据、模型交互与本地变异器），两通路对照、Vulkan-Samples 三道闸与两臂判读面、refbench/vks 报告也已收完；`autoloop` 编排也已收进 Rust（`phonefarm autoloop`），灰档层挂/摘（`gray-layer`）、灰档 A/B（`gray-ab`）与截帧比对（`shot-diff`）也已收进 Rust。剩下载体构建/路线工具、设备端 shell（按约定保持设备端）与 knobs/ 那批。
 - 系统参数与画面流程改写两层的真机评测：phonefarm 的 `eval --request` 接收端已落地并真机验证——③ 系统参数端到端已出报告（首候选 REJECT），② 灰档机械链路已通、命中口径已对齐（真机实测命中 27 处 / begins 9195）。
 
-`optimize` 总入口、agent skill 说明书、可视化前端这三个已经落地（详见 [game_opt_loop](https://github.com/HGamey/game_opt_loop) 🔒 的 STATUS.md）。
+`optimize` 总入口、agent skill 说明书、可视化前端这三个已经落地（此前方法记录见 [game_opt_loop STATUS](https://github.com/HGamey/docs/blob/main/repos/game_opt_loop/STATUS.md)）。
 
 ---
 
-## 快速上手
+## 从已选节点开始
 
-需要一台 macOS 或 Linux 工作站、一台有调试权限的手机（Android 走 adb，OpenHarmony 走 hdc），以及 Rust 与 C++ 编译环境。Apple Silicon 上构建完要对二进制做代码签名。
+先确认入口 URL、node_id、执行宿主和数据根；不默认选旧后台，不自动迁移原件。网页从该节点的 `/dash/fleet` 查看目录，`/dash/games` 准备资源，`/dash/jobs` 查看任务，`/dash/results` 查看结果，`/dash/research` 记录方向与协助。`/dash/control` 需查看授权和操作员令牌，操作能力按当前会话核查。
 
 ```bash
-# 底座
+# 在 harness-ops 工作目录使用已有节点与授权文件
+export PF_NODE_URL=https://node.example.invalid
+export PF_NODE_TOKEN_FILE=/private/path/node.token
+node/pf-node node                          # 先读身份、宿主与数据位置
+export PF_NODE_ID='确认后的 node_id'
+node/pf-node jobs
+node/pf-node research list direction
+```
+
+网页与 CLI 使用同一目标和对象；请求未确认时保留原 ID 查询，不改投其他节点。资源已缓存、应用安装、登录/场景就绪和实验收益各自需要证据。
+
+### 源码构建与可选客户端示例
+
+下面保留上游构建和 GOL 方法示例，均不是平台使用的必经步骤或真机验收。上游构建不代表当前 HGamey 节点协议；组织开发版本及配置按各仓 README 核对。需要相应 Rust/C++ 工具链，Apple Silicon 构建后重新签名。
+
+```bash
+# 上游底座源码
 git clone https://github.com/BH3GEI/phonefarm && cd phonefarm
 cd src && cargo build --release && cp target/release/phonefarm .. && cd ..
 codesign --force --sign - ./phonefarm   # macOS 需要
-./phonefarm devices                      # 看看设备连上没有
+./phonefarm devices                      # 枚举传输可见设备，不代表实验就绪
 
-# 决策层（🔒 私有仓库，组织成员可访问）
+# 可选 GOL 方法客户端（需相应仓库访问权限）
 git clone https://github.com/HGamey/game_opt_loop && cd game_opt_loop
 cargo test
 cargo run -- --track sr --generations 3 --children 4 --dry-run --no-llm
